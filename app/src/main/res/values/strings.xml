@@ -1,3 +1,22 @@
 <resources>
     <string name="app_name">Popular Movies</string>
+
+    <!--
+    - Menu
+    -->
+
+    <string name="action_settings">Settings</string>
+
+    <!--
+    - Preferences
+    -->
+
+    <!-- SharePreferences Labels -->
+    <string name="pref_sort_label">Sort by</string>
+    <string name="pref_sort_label_popular">Popular</string>
+    <string name="pref_sort_label_top_rated">Top Rated</string>
+    <!-- SharePreferences Keys -->
+    <string name="pref_sort_key" translatable="false">sort_by</string>
+    <string name="pref_sort_popular" translatable="false">popular</string>
+    <string name="pref_sort_top_rated" translatable="false">top_rated</string>
 </resources>
