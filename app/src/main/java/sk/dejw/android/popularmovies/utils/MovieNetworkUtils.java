@@ -23,8 +23,7 @@ public final class MovieNetworkUtils {
     private static final String TOP_RATED_URL =
             "http://api.themoviedb.org/3/movie/top_rated";
 
-    private static final String FORECAST_BASE_URL = POPULAR_URL;
-
+    //TODO provide API Key
     private static final String API_KEY = "";
 
     final static String API_KEY_PARAM = "api_key";

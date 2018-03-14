@@ -7,6 +7,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.ImageView;
+import android.widget.TextView;
 
 import com.squareup.picasso.Picasso;
 
@@ -19,12 +20,22 @@ public class MovieAdapter extends ArrayAdapter<Movie> {
 
     private static final String LOG_TAG = MovieAdapter.class.getSimpleName();
 
-    public MovieAdapter(@NonNull Context context, @NonNull List<Movie> movies) {
+    private final MovieAdapterOnClickHandler mClickHandler;
+
+    public MovieAdapter(@NonNull Context context, @NonNull List<Movie> movies, MovieAdapterOnClickHandler clickHandler) {
         super(context, 0, movies);
+        mClickHandler = clickHandler;
+    }
+
+    /**
+     * The interface that receives onClick messages.
+     */
+    public interface MovieAdapterOnClickHandler {
+        void onClick(Movie movie);
     }
 
     public View getView(int position, View convertView, ViewGroup parent) {
-        Movie movie = getItem(position);
+        final Movie movie = getItem(position);
 
         if (convertView == null) {
             convertView = LayoutInflater.from(getContext()).inflate(
@@ -35,10 +46,17 @@ public class MovieAdapter extends ArrayAdapter<Movie> {
         if (movie != null) {
             Picasso.with(getContext())
                     .load(movie.getFullPosterPath())
-//                    .placeholder(R.drawable.user_placeholder)
-//                    .error(R.drawable.user_placeholder_error)
+                    .placeholder(R.drawable.ic_image_black_24px)
+                    .error(R.drawable.ic_broken_image_black_24dp)
                     .into(movieImage);
         }
+
+        movieImage.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mClickHandler.onClick(movie);
+            }
+        });
 
         return convertView;
     }

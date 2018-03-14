@@ -2,6 +2,8 @@ package sk.dejw.android.popularmovies;
 
 import android.content.Context;
 import android.content.Intent;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.AsyncTask;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -17,6 +19,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.Arrays;
 
 import sk.dejw.android.popularmovies.adapters.MovieAdapter;
@@ -25,7 +28,7 @@ import sk.dejw.android.popularmovies.models.Movie;
 import sk.dejw.android.popularmovies.utils.MovieJsonUtils;
 import sk.dejw.android.popularmovies.utils.MovieNetworkUtils;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements MovieAdapter.MovieAdapterOnClickHandler {
 
     private static final String TAG = MainActivity.class.getSimpleName();
 
@@ -35,19 +38,22 @@ public class MainActivity extends AppCompatActivity {
 
     private MovieAdapter mMovieAdapter;
 
-//    private static final int NUMBER_OF_COLUMNS = 2;
+    private ArrayList<Movie> mListOfMovies;
 
-    //TODO this should be downloaded from server
-    Movie[] movies = {
-            new Movie("The Maze Runner", "/coss7RgL0NH6g4fC2s5atvf3dFO.jpg"),
-            new Movie("Kingsman: The Golden Circle", "/34xBL6BXNYFqtHO9zhcgoakS4aP.jpg"),
-            new Movie("Baby Driver", "/dN9LbVNNZFITwfaRjl4tmwGWkRg.jpg"),
-            new Movie("Batman v Superman: Dawn of Justice", "/cGOPbv9wA5gEejkUN892JrveARt.jpg"),
-    };
+    Movie[] movies = {};
+
+    public static final String BUNDLE_MOVIES = "movies";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        if(savedInstanceState == null || !savedInstanceState.containsKey(BUNDLE_MOVIES)) {
+            mListOfMovies = new ArrayList<Movie>(Arrays.asList(movies));
+        }
+        else {
+            mListOfMovies = savedInstanceState.getParcelableArrayList(BUNDLE_MOVIES);
+        }
+
         setContentView(R.layout.activity_main);
 
         mGridView = (GridView) findViewById(R.id.gw_posters);
@@ -56,7 +62,7 @@ public class MainActivity extends AppCompatActivity {
 
 
         //set adapter for gridview
-        mMovieAdapter = new MovieAdapter(this, Arrays.asList(movies));
+        mMovieAdapter = new MovieAdapter(this, mListOfMovies, this);
 
         // Get a reference to the ListView, and attach this adapter to it.
         mGridView.setAdapter(mMovieAdapter);
@@ -68,16 +74,30 @@ public class MainActivity extends AppCompatActivity {
                         Toast.LENGTH_SHORT).show();
             }
         });
+    }
+
+    @Override
+    public void onResume()
+    {
+        super.onResume();
 
         //Get data from remote with async task
         loadMovieData();
     }
 
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        outState.putParcelableArrayList(BUNDLE_MOVIES, mListOfMovies);
+        super.onSaveInstanceState(outState);
+    }
+
     private void loadMovieData() {
         showMovieDataView();
 
-        String sortBy = MoviePreferences.sortBy(this);
-        new FetchMoviesTask(this).execute(sortBy);
+        if (hasConnection()) {
+            String sortBy = MoviePreferences.sortBy(this);
+            new FetchMoviesTask(this).execute(sortBy);
+        }
     }
 
     private void showMovieDataView() {
@@ -90,11 +110,18 @@ public class MainActivity extends AppCompatActivity {
         mErrorMessage.setVisibility(View.VISIBLE);
     }
 
+    @Override
+    public void onClick(Movie movie) {
+        Intent movieDetailIntent = new Intent(MainActivity.this, DetailActivity.class);
+        movieDetailIntent.putExtra(DetailActivity.EXTRA_TEXT, movie);
+        startActivity(movieDetailIntent);
+    }
+
     public class FetchMoviesTask extends AsyncTask<String, Void, Movie[]> {
 
         private Context mContext;
 
-        public FetchMoviesTask (Context context){
+        public FetchMoviesTask(Context context) {
             mContext = context;
         }
 
@@ -106,8 +133,6 @@ public class MainActivity extends AppCompatActivity {
 
         @Override
         protected Movie[] doInBackground(String... params) {
-
-            /* If there's no zip code, there's nothing to look up. */
             if (params.length == 0) {
                 return null;
             }
@@ -136,8 +161,10 @@ public class MainActivity extends AppCompatActivity {
             Log.e(TAG, mMovieAdapter.toString());
             if (movies != null) {
                 showMovieDataView();
-//                mMovieAdapter.clear();
-                mMovieAdapter.addAll(Arrays.asList(movies));
+                ArrayList<Movie> listOfMovies = new ArrayList<Movie>(Arrays.asList(movies));
+                mMovieAdapter.clear();
+                mMovieAdapter.addAll(listOfMovies);
+                mMovieAdapter.notifyDataSetChanged();
             } else {
                 showErrorMessage();
             }
@@ -160,6 +187,21 @@ public class MainActivity extends AppCompatActivity {
             return true;
         }
 
+        if (id == R.id.action_refresh) {
+            loadMovieData();
+            return true;
+        }
+
         return super.onOptionsItemSelected(item);
+    }
+
+    public boolean hasConnection() {
+        ConnectivityManager connectivityManager = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+        try {
+            NetworkInfo netInfo = connectivityManager.getActiveNetworkInfo();
+            return netInfo != null && netInfo.isConnectedOrConnecting();
+        } catch (NullPointerException $npe) {
+            return false;
+        }
     }
 }
