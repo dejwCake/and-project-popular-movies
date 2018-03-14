@@ -45,8 +45,8 @@ public class MovieAdapter extends ArrayAdapter<Movie> {
         ImageView movieImage = (ImageView) convertView.findViewById(R.id.movie_image);
         if (movie != null) {
             Picasso.with(getContext())
-                    .load(movie.getFullPosterPath())
-                    .placeholder(R.drawable.ic_image_black_24px)
+                    .load(movie.getFullPosterPath(Movie.SIZE_W185))
+//                    .placeholder(R.drawable.ic_image_black_24px)
                     .error(R.drawable.ic_broken_image_black_24dp)
                     .into(movieImage);
         }

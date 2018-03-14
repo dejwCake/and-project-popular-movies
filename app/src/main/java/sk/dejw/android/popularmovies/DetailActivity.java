@@ -55,8 +55,8 @@ public class DetailActivity extends AppCompatActivity {
             mPlot.setText(mMovie.getPlot());
 
             Picasso.with(this)
-                .load(mMovie.getBigFullPosterPath())
-                .placeholder(R.drawable.ic_image_black_24px)
+                .load(mMovie.getFullPosterPath(Movie.SIZE_W342))
+//                .placeholder(R.drawable.ic_image_black_24px)
                 .error(R.drawable.ic_broken_image_black_24dp)
                 .into(mMovieImage);
         }

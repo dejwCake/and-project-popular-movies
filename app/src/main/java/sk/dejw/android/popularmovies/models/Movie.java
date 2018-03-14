@@ -12,8 +12,15 @@ public class Movie implements Parcelable {
     private Double rating;
     private Date releaseDate;
 
-    public static final String IMAGE_URL_SMALL = "http://image.tmdb.org/t/p/w185/";
-    public static final String IMAGE_URL_BIG = "http://image.tmdb.org/t/p/w342/";
+    public static final String IMAGE_URL = "http://image.tmdb.org/t/p/";
+
+    public static final String SIZE_W92 = "w92/";
+    public static final String SIZE_W154 = "w154/";
+    public static final String SIZE_W185 = "w185/";
+    public static final String SIZE_W342 = "w342/";
+    public static final String SIZE_W500 = "w500/";
+    public static final String SIZE_W780 = "w780/";
+    public static final String SIZE_ORIGINAL = "original/";
 
     public Movie(String vTitle, String vPosterPath, String vOverview, Double vVoteAverage, Date vReleaseDate)
     {
@@ -44,12 +51,8 @@ public class Movie implements Parcelable {
         return posterPath;
     }
 
-    public String getFullPosterPath() {
-        return IMAGE_URL_SMALL.concat(posterPath);
-    }
-
-    public String getBigFullPosterPath() {
-        return IMAGE_URL_BIG.concat(posterPath);
+    public String getFullPosterPath(String size) {
+        return IMAGE_URL.concat(size).concat(posterPath);
     }
 
     public void setPosterPath(String posterPath) {

@@ -97,6 +97,8 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.Movi
         if (hasConnection()) {
             String sortBy = MoviePreferences.sortBy(this);
             new FetchMoviesTask(this).execute(sortBy);
+        } else {
+            showErrorMessage();
         }
     }
 
