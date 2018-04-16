@@ -25,6 +25,7 @@ import java.util.Arrays;
 import sk.dejw.android.popularmovies.adapters.MovieAdapter;
 import sk.dejw.android.popularmovies.data.MoviePreferences;
 import sk.dejw.android.popularmovies.models.Movie;
+import sk.dejw.android.popularmovies.utils.GlobalNetworkUtils;
 import sk.dejw.android.popularmovies.utils.MovieJsonUtils;
 import sk.dejw.android.popularmovies.utils.MovieNetworkUtils;
 
@@ -47,10 +48,9 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.Movi
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        if(savedInstanceState == null || !savedInstanceState.containsKey(BUNDLE_MOVIES)) {
+        if (savedInstanceState == null || !savedInstanceState.containsKey(BUNDLE_MOVIES)) {
             mListOfMovies = new ArrayList<Movie>(Arrays.asList(movies));
-        }
-        else {
+        } else {
             mListOfMovies = savedInstanceState.getParcelableArrayList(BUNDLE_MOVIES);
         }
 
@@ -77,8 +77,7 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.Movi
     }
 
     @Override
-    public void onResume()
-    {
+    public void onResume() {
         super.onResume();
 
         //Get data from remote with async task
@@ -94,7 +93,7 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.Movi
     private void loadMovieData() {
         showMovieDataView();
 
-        if (hasConnection()) {
+        if (GlobalNetworkUtils.hasConnection(this)) {
             String sortBy = MoviePreferences.sortBy(this);
             new FetchMoviesTask(this).execute(sortBy);
         } else {
@@ -160,7 +159,7 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.Movi
         @Override
         protected void onPostExecute(Movie[] movies) {
             mLoadingIndicator.setVisibility(View.INVISIBLE);
-            Log.e(TAG, mMovieAdapter.toString());
+            Log.i(TAG, mMovieAdapter.toString());
             if (movies != null) {
                 showMovieDataView();
                 ArrayList<Movie> listOfMovies = new ArrayList<Movie>(Arrays.asList(movies));
@@ -195,18 +194,5 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.Movi
         }
 
         return super.onOptionsItemSelected(item);
-    }
-
-    /**
-     * Based on https://stackoverflow.com/questions/1560788/how-to-check-internet-access-on-android-inetaddress-never-times-out
-     */
-    public boolean hasConnection() {
-        ConnectivityManager connectivityManager = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
-        try {
-            NetworkInfo netInfo = connectivityManager.getActiveNetworkInfo();
-            return netInfo != null && netInfo.isConnectedOrConnecting();
-        } catch (NullPointerException $npe) {
-            return false;
-        }
     }
 }

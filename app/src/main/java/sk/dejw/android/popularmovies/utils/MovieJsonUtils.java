@@ -20,6 +20,7 @@ public final class MovieJsonUtils {
 
         final String MOVIE_RESULTS = "results";
 
+        final String MOVIE_ID = "id";
         final String MOVIE_TITLE = "title";
         final String MOVIE_POSTER_PATH = "poster_path";
         final String MOVIE_PLOT = "overview";
@@ -48,11 +49,14 @@ public final class MovieJsonUtils {
                 releaseDate = Calendar.getInstance().getTime();
             }
 
-            movies[i] = new Movie(movieJson.getString(MOVIE_TITLE),
-                    movieJson.getString(MOVIE_POSTER_PATH),
-                    movieJson.getString(MOVIE_PLOT),
-                    movieJson.getDouble(MOVIE_RATING),
-                    releaseDate);
+            movies[i] = new Movie(
+                movieJson.getInt(MOVIE_ID),
+                movieJson.getString(MOVIE_TITLE),
+                movieJson.getString(MOVIE_POSTER_PATH),
+                movieJson.getString(MOVIE_PLOT),
+                movieJson.getDouble(MOVIE_RATING),
+                releaseDate
+            );
         }
 
         return movies;
