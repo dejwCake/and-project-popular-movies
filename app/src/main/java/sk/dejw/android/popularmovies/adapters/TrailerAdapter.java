@@ -1,7 +1,6 @@
 package sk.dejw.android.popularmovies.adapters;
 
 import android.content.Context;
-import android.database.Cursor;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -10,16 +9,18 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import java.util.ArrayList;
+
 import sk.dejw.android.popularmovies.R;
 import sk.dejw.android.popularmovies.models.Trailer;
 
-class TrailerAdapter extends RecyclerView.Adapter<TrailerAdapter.TrailerAdapterViewHolder> {
+public class TrailerAdapter extends RecyclerView.Adapter<TrailerAdapter.TrailerAdapterViewHolder> {
 
     private final Context mContext;
 
     final private TrailerAdapterOnClickHandler mClickHandler;
 
-    private Trailer[] mTrailers;
+    private ArrayList<Trailer> mTrailers;
 
     /**
      * The interface that receives onTrailerClick messages.
@@ -28,14 +29,14 @@ class TrailerAdapter extends RecyclerView.Adapter<TrailerAdapter.TrailerAdapterV
         void onTrailerClick(Trailer trailer);
     }
 
-    public TrailerAdapter(@NonNull Context context, Trailer[] trailers, TrailerAdapterOnClickHandler clickHandler) {
+    public TrailerAdapter(@NonNull Context context, ArrayList<Trailer> trailers, TrailerAdapterOnClickHandler clickHandler) {
         mContext = context;
         mClickHandler = clickHandler;
         mTrailers = trailers;
     }
 
     @Override
-    public TrailerAdapterViewHolder onCreateViewHolder(ViewGroup viewGroup, int viewType) {
+    public TrailerAdapterViewHolder onCreateViewHolder(@NonNull ViewGroup viewGroup, int viewType) {
 
         View view = LayoutInflater.from(mContext).inflate(R.layout.trailer_list_item, viewGroup, false);
 
@@ -45,18 +46,22 @@ class TrailerAdapter extends RecyclerView.Adapter<TrailerAdapter.TrailerAdapterV
     }
 
     @Override
-    public void onBindViewHolder(TrailerAdapterViewHolder trailerAdapterViewHolder, int position) {
-        //TODO finish
+    public void onBindViewHolder(@NonNull TrailerAdapterViewHolder trailerAdapterViewHolder, int position) {
+        Trailer trailer = mTrailers.get(position);
+
+        trailerAdapterViewHolder.iconView.setImageResource(R.drawable.ic_play_arrow_black_24dp);
+        trailerAdapterViewHolder.nameView.setText(trailer.getName());
+        trailerAdapterViewHolder.trailer = trailer;
     }
 
     @Override
     public int getItemCount() {
         if (null == mTrailers) return 0;
-        return mTrailers.length;
+        return mTrailers.size();
     }
 
-    void swapTrailers(Trailer[] newTreilers) {
-        mTrailers = newTreilers;
+    public void swapTrailers(ArrayList<Trailer> newTrailers) {
+        mTrailers = newTrailers;
         notifyDataSetChanged();
     }
 
@@ -64,6 +69,8 @@ class TrailerAdapter extends RecyclerView.Adapter<TrailerAdapter.TrailerAdapterV
         final ImageView iconView;
 
         final TextView nameView;
+
+        Trailer trailer = null;
 
         TrailerAdapterViewHolder(View view) {
             super(view);
@@ -75,8 +82,7 @@ class TrailerAdapter extends RecyclerView.Adapter<TrailerAdapter.TrailerAdapterV
         }
 
         public void onClick(View v) {
-            //TODO fill on click, get trailer
-//            mClickHandler.onClick(trailer);
+            mClickHandler.onTrailerClick(trailer);
         }
     }
 }

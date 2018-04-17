@@ -11,6 +11,7 @@ public class Trailer implements Parcelable {
     private String key;
 
     public static final String YOU_TUBE_URL = "https://www.youtube.com/watch?v=";
+    public static final String YOU_TUBE_APP = "vnd.youtube:";
 
     public Trailer(String vId, String vName, String vKey)
     {
@@ -51,6 +52,10 @@ public class Trailer implements Parcelable {
 
     public String getYouTubePath() {
         return YOU_TUBE_URL.concat(key);
+    }
+
+    public String getYouTubeApp() {
+        return YOU_TUBE_APP.concat(key);
     }
 
     @Override

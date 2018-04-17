@@ -1,10 +1,13 @@
 package sk.dejw.android.popularmovies;
 
+import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.Menu;
@@ -25,15 +28,14 @@ import java.util.Arrays;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import sk.dejw.android.popularmovies.adapters.TrailerAdapter;
 import sk.dejw.android.popularmovies.models.Movie;
 import sk.dejw.android.popularmovies.models.Trailer;
 import sk.dejw.android.popularmovies.utils.GlobalNetworkUtils;
-import sk.dejw.android.popularmovies.utils.MovieJsonUtils;
-import sk.dejw.android.popularmovies.utils.MovieNetworkUtils;
 import sk.dejw.android.popularmovies.utils.TrailerJsonUtils;
 import sk.dejw.android.popularmovies.utils.TrailerNetworkUtils;
 
-public class DetailActivity extends AppCompatActivity {
+public class DetailActivity extends AppCompatActivity implements TrailerAdapter.TrailerAdapterOnClickHandler {
 
     private static final String TAG = DetailActivity.class.getSimpleName();
 
@@ -52,6 +54,7 @@ public class DetailActivity extends AppCompatActivity {
     @BindView(R.id.movie_image)
     ImageView mMovieImage;
 
+    private TrailerAdapter mTrailerAdapter;
     @BindView(R.id.rv_trailers)
     RecyclerView mTrailerView;
     @BindView(R.id.pb_review_loading_indicator)
@@ -59,13 +62,11 @@ public class DetailActivity extends AppCompatActivity {
     @BindView(R.id.tv_trailer_error_message)
     TextView mTrailerErrorMessage;
 
-//    private TrailerAdapter mTrailerAdapter;
-
     private ArrayList<Trailer> mListOfTrailers;
 
-    Trailer[] trailers = {};
+    Trailer[] mTrailers = {};
 
-    public static final String BUNDLE_TRAILERS = "trailers";
+    public static final String BUNDLE_TRAILERS = "mTrailers";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -83,24 +84,23 @@ public class DetailActivity extends AppCompatActivity {
         }
 
         if (savedInstanceState == null || !savedInstanceState.containsKey(BUNDLE_TRAILERS)) {
-            mListOfTrailers = new ArrayList<Trailer>(Arrays.asList(trailers));
+            mListOfTrailers = new ArrayList<Trailer>(Arrays.asList(mTrailers));
         } else {
             mListOfTrailers = savedInstanceState.getParcelableArrayList(BUNDLE_TRAILERS);
         }
 
-//        //set adapter for gridview
-//        mMovieAdapter = new MovieAdapter(this, mListOfMovies, this);
-//
-//        // Get a reference to the ListView, and attach this adapter to it.
-//        mGridView.setAdapter(mMovieAdapter);
-//
-//        mGridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-//            public void onItemClick(AdapterView<?> parent, View v,
-//                                    int position, long id) {
-//                Toast.makeText(MainActivity.this, "" + position,
-//                        Toast.LENGTH_SHORT).show();
-//            }
-//        });
+        LinearLayoutManager layoutManager =
+                new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false);
+
+        /* setLayoutManager associates the LayoutManager we created above with our RecyclerView */
+        mTrailerView.setLayoutManager(layoutManager);
+
+        mTrailerView.setHasFixedSize(true);
+
+        mTrailerAdapter = new TrailerAdapter(this, mListOfTrailers, this);
+
+        /* Setting the adapter attaches it to the RecyclerView in our layout. */
+        mTrailerView.setAdapter(mTrailerAdapter);
 
         loadTrailerData();
     }
@@ -147,13 +147,17 @@ public class DetailActivity extends AppCompatActivity {
         mTrailerErrorMessage.setVisibility(View.VISIBLE);
     }
 
-    //TODO start youtube intent
-//    @Override
-//    public void onTrailerClick(Trailer trailer) {
-//        Intent movieDetailIntent = new Intent(MainActivity.this, DetailActivity.class);
-//        movieDetailIntent.putExtra(DetailActivity.EXTRA_TEXT, movie);
-//        startActivity(movieDetailIntent);
-//    }
+    @Override
+    public void onTrailerClick(Trailer trailer) {
+        Intent appIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(trailer.getYouTubeApp()));
+        Intent webIntent = new Intent(Intent.ACTION_VIEW,
+                Uri.parse(trailer.getYouTubePath()));
+        try {
+            this.startActivity(appIntent);
+        } catch (ActivityNotFoundException ex) {
+            this.startActivity(webIntent);
+        }
+    }
 
     public class FetchTrailersTask extends AsyncTask<Integer, Void, Trailer[]> {
 
@@ -201,9 +205,7 @@ public class DetailActivity extends AppCompatActivity {
             if (trailers != null) {
                 showTrailerDataView();
                 ArrayList<Trailer> listOfTrailers = new ArrayList<Trailer>(Arrays.asList(trailers));
-//                mMovieAdapter.clear();
-//                mMovieAdapter.addAll(listOfTrailers);
-//                mMovieAdapter.notifyDataSetChanged();
+                mTrailerAdapter.swapTrailers(listOfTrailers);
             } else {
                 showTrailerErrorMessage();
             }
