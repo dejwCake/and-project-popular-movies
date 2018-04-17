@@ -28,14 +28,19 @@ import java.util.Arrays;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import sk.dejw.android.popularmovies.adapters.ReviewAdapter;
 import sk.dejw.android.popularmovies.adapters.TrailerAdapter;
 import sk.dejw.android.popularmovies.models.Movie;
+import sk.dejw.android.popularmovies.models.Review;
 import sk.dejw.android.popularmovies.models.Trailer;
 import sk.dejw.android.popularmovies.utils.GlobalNetworkUtils;
+import sk.dejw.android.popularmovies.utils.ReviewJsonUtils;
+import sk.dejw.android.popularmovies.utils.ReviewNetworkUtils;
 import sk.dejw.android.popularmovies.utils.TrailerJsonUtils;
 import sk.dejw.android.popularmovies.utils.TrailerNetworkUtils;
 
-public class DetailActivity extends AppCompatActivity implements TrailerAdapter.TrailerAdapterOnClickHandler {
+public class DetailActivity extends AppCompatActivity
+        implements TrailerAdapter.TrailerAdapterOnClickHandler, ReviewAdapter.ReviewAdapterOnClickHandler {
 
     private static final String TAG = DetailActivity.class.getSimpleName();
 
@@ -57,7 +62,7 @@ public class DetailActivity extends AppCompatActivity implements TrailerAdapter.
     private TrailerAdapter mTrailerAdapter;
     @BindView(R.id.rv_trailers)
     RecyclerView mTrailerView;
-    @BindView(R.id.pb_review_loading_indicator)
+    @BindView(R.id.pb_trailer_loading_indicator)
     ProgressBar mTrailerLoadingIndicator;
     @BindView(R.id.tv_trailer_error_message)
     TextView mTrailerErrorMessage;
@@ -67,6 +72,20 @@ public class DetailActivity extends AppCompatActivity implements TrailerAdapter.
     Trailer[] mTrailers = {};
 
     public static final String BUNDLE_TRAILERS = "mTrailers";
+
+    private ReviewAdapter mReviewAdapter;
+    @BindView(R.id.rv_reviews)
+    RecyclerView mReviewView;
+    @BindView(R.id.pb_review_loading_indicator)
+    ProgressBar mReviewLoadingIndicator;
+    @BindView(R.id.tv_review_error_message)
+    TextView mReviewErrorMessage;
+
+    private ArrayList<Review> mListOfReviews;
+
+    Review[] mReviews = {};
+
+    public static final String BUNDLE_REVIEWS = "mReviews";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -83,6 +102,11 @@ public class DetailActivity extends AppCompatActivity implements TrailerAdapter.
             }
         }
 
+        prepareTrailers(savedInstanceState);
+        prepareReviews(savedInstanceState);
+    }
+
+    private void prepareTrailers(Bundle savedInstanceState) {
         if (savedInstanceState == null || !savedInstanceState.containsKey(BUNDLE_TRAILERS)) {
             mListOfTrailers = new ArrayList<Trailer>(Arrays.asList(mTrailers));
         } else {
@@ -95,7 +119,7 @@ public class DetailActivity extends AppCompatActivity implements TrailerAdapter.
         /* setLayoutManager associates the LayoutManager we created above with our RecyclerView */
         mTrailerView.setLayoutManager(layoutManager);
 
-        mTrailerView.setHasFixedSize(true);
+        mTrailerView.setHasFixedSize(false);
 
         mTrailerAdapter = new TrailerAdapter(this, mListOfTrailers, this);
 
@@ -103,6 +127,29 @@ public class DetailActivity extends AppCompatActivity implements TrailerAdapter.
         mTrailerView.setAdapter(mTrailerAdapter);
 
         loadTrailerData();
+    }
+
+    private void prepareReviews(Bundle savedInstanceState) {
+        if (savedInstanceState == null || !savedInstanceState.containsKey(BUNDLE_REVIEWS)) {
+            mListOfReviews = new ArrayList<Review>(Arrays.asList(mReviews));
+        } else {
+            mListOfReviews = savedInstanceState.getParcelableArrayList(BUNDLE_REVIEWS);
+        }
+
+        LinearLayoutManager layoutManager =
+                new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false);
+
+        /* setLayoutManager associates the LayoutManager we created above with our RecyclerView */
+        mReviewView.setLayoutManager(layoutManager);
+
+        mReviewView.setHasFixedSize(false);
+
+        mReviewAdapter = new ReviewAdapter(this, mListOfReviews, this);
+
+        /* Setting the adapter attaches it to the RecyclerView in our layout. */
+        mReviewView.setAdapter(mReviewAdapter);
+
+        loadReviewData();
     }
 
     private void setLayout() {
@@ -124,6 +171,7 @@ public class DetailActivity extends AppCompatActivity implements TrailerAdapter.
     @Override
     public void onSaveInstanceState(Bundle outState) {
         outState.putParcelableArrayList(BUNDLE_TRAILERS, mListOfTrailers);
+        outState.putParcelableArrayList(BUNDLE_REVIEWS, mListOfReviews);
         super.onSaveInstanceState(outState);
     }
 
@@ -145,18 +193,6 @@ public class DetailActivity extends AppCompatActivity implements TrailerAdapter.
     private void showTrailerErrorMessage() {
         mTrailerView.setVisibility(View.INVISIBLE);
         mTrailerErrorMessage.setVisibility(View.VISIBLE);
-    }
-
-    @Override
-    public void onTrailerClick(Trailer trailer) {
-        Intent appIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(trailer.getYouTubeApp()));
-        Intent webIntent = new Intent(Intent.ACTION_VIEW,
-                Uri.parse(trailer.getYouTubePath()));
-        try {
-            this.startActivity(appIntent);
-        } catch (ActivityNotFoundException ex) {
-            this.startActivity(webIntent);
-        }
     }
 
     public class FetchTrailersTask extends AsyncTask<Integer, Void, Trailer[]> {
@@ -200,16 +236,105 @@ public class DetailActivity extends AppCompatActivity implements TrailerAdapter.
         @Override
         protected void onPostExecute(Trailer[] trailers) {
             mTrailerLoadingIndicator.setVisibility(View.INVISIBLE);
-//            Log.i(TAG, mMovieAdapter.toString());
             Log.i(TAG, String.valueOf(trailers.length));
             if (trailers != null) {
                 showTrailerDataView();
-                ArrayList<Trailer> listOfTrailers = new ArrayList<Trailer>(Arrays.asList(trailers));
-                mTrailerAdapter.swapTrailers(listOfTrailers);
+                mListOfTrailers = new ArrayList<Trailer>(Arrays.asList(trailers));
+                mTrailerAdapter.swapTrailers(mListOfTrailers);
             } else {
                 showTrailerErrorMessage();
             }
         }
+    }
+
+    private void loadReviewData() {
+        showReviewDataView();
+
+        if (GlobalNetworkUtils.hasConnection(this)) {
+            new DetailActivity.FetchReviewsTask(this).execute(mMovie.getId());
+        } else {
+            showReviewErrorMessage();
+        }
+    }
+
+    private void showReviewDataView() {
+        mReviewErrorMessage.setVisibility(View.INVISIBLE);
+        mReviewView.setVisibility(View.VISIBLE);
+    }
+
+    private void showReviewErrorMessage() {
+        mReviewView.setVisibility(View.INVISIBLE);
+        mReviewErrorMessage.setVisibility(View.VISIBLE);
+    }
+
+    public class FetchReviewsTask extends AsyncTask<Integer, Void, Review[]> {
+
+        private Context mContext;
+
+        public FetchReviewsTask(Context context) {
+            mContext = context;
+        }
+
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+            mReviewLoadingIndicator.setVisibility(View.VISIBLE);
+        }
+
+        @Override
+        protected Review[] doInBackground(Integer... params) {
+            if (params.length == 0) {
+                return null;
+            }
+
+            Integer id = params[0];
+            URL requestUrl = ReviewNetworkUtils.buildUrl(id, mContext);
+
+            try {
+                String jsonResponse = ReviewNetworkUtils
+                        .getResponseFromHttpUrl(requestUrl);
+
+                Review[] reviews = ReviewJsonUtils
+                        .getReviewsFromJson(DetailActivity.this, jsonResponse);
+
+                return reviews;
+
+            } catch (Exception e) {
+                e.printStackTrace();
+                return null;
+            }
+        }
+
+        @Override
+        protected void onPostExecute(Review[] reviews) {
+            mReviewLoadingIndicator.setVisibility(View.INVISIBLE);
+            Log.i(TAG, String.valueOf(reviews.length));
+            if (reviews != null) {
+                showReviewDataView();
+                mListOfReviews = new ArrayList<Review>(Arrays.asList(reviews));
+                mReviewAdapter.swapReviews(mListOfReviews);
+            } else {
+                showReviewErrorMessage();
+            }
+        }
+    }
+
+    @Override
+    public void onTrailerClick(Trailer trailer) {
+        Intent appIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(trailer.getYouTubeApp()));
+        Intent webIntent = new Intent(Intent.ACTION_VIEW,
+                Uri.parse(trailer.getYouTubePath()));
+        try {
+            this.startActivity(appIntent);
+        } catch (ActivityNotFoundException ex) {
+            this.startActivity(webIntent);
+        }
+    }
+
+    @Override
+    public void onReviewClick(Review review) {
+        Intent webIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(review.getUrl()));
+        this.startActivity(webIntent);
     }
 
     @Override

@@ -5,4 +5,7 @@
     <dimen name="list_item_padding_vertical">12dp</dimen>
     <dimen name="list_item_name_left_margin">16dp</dimen>
     <dimen name="list_item_name_start_margin">@dimen/list_item_name_left_margin</dimen>
+    <dimen name="list_item_name_right_margin">16dp</dimen>
+    <dimen name="list_item_name_end_margin">@dimen/list_item_name_right_margin</dimen>
+    <dimen name="list_item_name_top_margin">8dp</dimen>
 </resources>

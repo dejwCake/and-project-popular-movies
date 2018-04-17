@@ -14,7 +14,7 @@ import java.util.Scanner;
 import sk.dejw.android.popularmovies.BuildConfig;
 import sk.dejw.android.popularmovies.R;
 
-public final class MovieNetworkUtils {
+public final class MovieNetworkUtils extends TheMovieDbNetworkUtils {
 
     private static final String TAG = MovieNetworkUtils.class.getSimpleName();
 
@@ -23,10 +23,6 @@ public final class MovieNetworkUtils {
 
     private static final String TOP_RATED_URL =
             "http://api.themoviedb.org/3/movie/top_rated";
-
-    private static final String API_KEY = BuildConfig.MOVIE_DB_API_KEY;
-
-    final static String API_KEY_PARAM = "api_key";
 
     public static URL buildUrl(String sortBy, Context context) {
         Uri builtUri = Uri.parse(POPULAR_URL);
@@ -47,24 +43,5 @@ public final class MovieNetworkUtils {
         Log.v(TAG, "Built URI " + url);
 
         return url;
-    }
-
-    public static String getResponseFromHttpUrl(URL url) throws IOException {
-        HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
-        try {
-            InputStream in = urlConnection.getInputStream();
-
-            Scanner scanner = new Scanner(in);
-            scanner.useDelimiter("\\A");
-
-            boolean hasInput = scanner.hasNext();
-            if (hasInput) {
-                return scanner.next();
-            } else {
-                return null;
-            }
-        } finally {
-            urlConnection.disconnect();
-        }
     }
 }

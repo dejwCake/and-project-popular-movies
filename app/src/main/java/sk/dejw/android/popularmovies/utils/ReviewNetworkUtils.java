@@ -13,13 +13,13 @@ import java.util.Scanner;
 
 import sk.dejw.android.popularmovies.BuildConfig;
 
-public final class TrailerNetworkUtils extends TheMovieDbNetworkUtils {
+public final class ReviewNetworkUtils extends TheMovieDbNetworkUtils {
 
-    private static final String TAG = TrailerNetworkUtils.class.getSimpleName();
+    private static final String TAG = ReviewNetworkUtils.class.getSimpleName();
 
     private static final String BASE_URL = "http://api.themoviedb.org/3/movie";
 
-    private static final String RESOURCE = "videos";
+    private static final String RESOURCE = "reviews";
 
     public static URL buildUrl(Integer movieId, Context context) {
         Uri builtUri = Uri.parse(BASE_URL);

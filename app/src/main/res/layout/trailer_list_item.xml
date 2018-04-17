@@ -25,7 +25,6 @@
         android:textAppearance="@style/TextAppearance.AppCompat.Subhead"
         android:layout_marginStart="@dimen/list_item_name_start_margin"
         android:layout_marginLeft="@dimen/list_item_name_start_margin"
-        app:layout_constraintLeft_toRightOf="@+id/iv_trailer_play_icon"
-        tools:text="aaa" />
+        app:layout_constraintLeft_toRightOf="@+id/iv_trailer_play_icon" />
 
 </android.support.constraint.ConstraintLayout>
