@@ -54,6 +54,8 @@ public class DetailActivity extends AppCompatActivity
     TextView mRating;
     @BindView(R.id.tv_release_date)
     TextView mReleaseDate;
+    @BindView(R.id.iv_favorite_icon)
+    ImageView mFavoriteIcon;
     @BindView(R.id.tv_plot)
     TextView mPlot;
     @BindView(R.id.movie_image)
@@ -159,6 +161,15 @@ public class DetailActivity extends AppCompatActivity
             DateFormat dateFormat = android.text.format.DateFormat.getDateFormat(getApplicationContext());
             mReleaseDate.setText(dateFormat.format(mMovie.getReleaseDate()));
             mPlot.setText(mMovie.getPlot());
+            mFavoriteIcon.setImageResource(R.drawable.ic_star_border_black_24dp);
+
+            //TODO check if movie is in DB, if so, set favorite to true
+            boolean favorite = false;
+            if(favorite) {
+                mFavoriteIcon.setImageResource(R.drawable.ic_star_black_24dp);
+            }
+            mFavoriteIcon.setClickable(true);
+            mFavoriteIcon.setOnClickListner(your_listner);
 
             Picasso.with(this)
                     .load(mMovie.getFullPosterPath(Movie.SIZE_W342))

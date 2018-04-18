@@ -82,6 +82,17 @@
             app:layout_constraintStart_toEndOf="@+id/movie_image"
             app:layout_constraintTop_toBottomOf="@+id/tv_release_date_label" />
 
+        <ImageView
+            android:id="@+id/iv_favorite_icon"
+            android:layout_width="@dimen/list_item_icon"
+            android:layout_height="@dimen/list_item_icon"
+            android:layout_marginEnd="8dp"
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="8dp"
+            tools:src="@drawable/ic_star_border_black_24dp"
+            app:layout_constraintStart_toEndOf="@+id/movie_image"
+            app:layout_constraintTop_toBottomOf="@+id/tv_release_date" />
+
         <TextView
             android:id="@+id/tv_plot"
             android:layout_width="0dp"
