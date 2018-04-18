@@ -14,6 +14,7 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
@@ -88,6 +89,8 @@ public class DetailActivity extends AppCompatActivity
     Review[] mReviews = {};
 
     public static final String BUNDLE_REVIEWS = "mReviews";
+
+    boolean isFavorite = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -164,12 +167,25 @@ public class DetailActivity extends AppCompatActivity
             mFavoriteIcon.setImageResource(R.drawable.ic_star_border_black_24dp);
 
             //TODO check if movie is in DB, if so, set favorite to true
-            boolean favorite = false;
-            if(favorite) {
+
+            if(isFavorite) {
                 mFavoriteIcon.setImageResource(R.drawable.ic_star_black_24dp);
             }
             mFavoriteIcon.setClickable(true);
-            mFavoriteIcon.setOnClickListner(your_listner);
+            mFavoriteIcon.setOnClickListener(new OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    if(isFavorite) {
+                        //TODO Remove from favorite
+                        mFavoriteIcon.setImageResource(R.drawable.ic_star_border_black_24dp);
+                        isFavorite = false;
+                    } else {
+                        //TODO Add to favorite
+                        mFavoriteIcon.setImageResource(R.drawable.ic_star_black_24dp);
+                        isFavorite = true;
+                    }
+                }
+            });
 
             Picasso.with(this)
                     .load(mMovie.getFullPosterPath(Movie.SIZE_W342))
