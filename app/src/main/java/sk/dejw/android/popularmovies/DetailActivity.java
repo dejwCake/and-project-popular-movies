@@ -1,8 +1,11 @@
 package sk.dejw.android.popularmovies;
 
 import android.content.ActivityNotFoundException;
+import android.content.ContentResolver;
+import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
+import android.database.Cursor;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.support.v7.app.AppCompatActivity;
@@ -31,6 +34,7 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import sk.dejw.android.popularmovies.adapters.ReviewAdapter;
 import sk.dejw.android.popularmovies.adapters.TrailerAdapter;
+import sk.dejw.android.popularmovies.data.FavoriteMoviesContract;
 import sk.dejw.android.popularmovies.models.Movie;
 import sk.dejw.android.popularmovies.models.Review;
 import sk.dejw.android.popularmovies.models.Trailer;
@@ -168,7 +172,7 @@ public class DetailActivity extends AppCompatActivity
 
             //TODO check if movie is in DB, if so, set favorite to true
 
-            if(isFavorite) {
+            if(isFavorite = checkIfFavorite()) {
                 mFavoriteIcon.setImageResource(R.drawable.ic_star_black_24dp);
             }
             mFavoriteIcon.setClickable(true);
@@ -176,11 +180,13 @@ public class DetailActivity extends AppCompatActivity
                 @Override
                 public void onClick(View v) {
                     if(isFavorite) {
-                        //TODO Remove from favorite
+                        //Remove from favorite
+                        removeFromFavorites();
                         mFavoriteIcon.setImageResource(R.drawable.ic_star_border_black_24dp);
                         isFavorite = false;
                     } else {
-                        //TODO Add to favorite
+                        //Add to favorite
+                        addToFavorites();
                         mFavoriteIcon.setImageResource(R.drawable.ic_star_black_24dp);
                         isFavorite = true;
                     }
@@ -193,6 +199,51 @@ public class DetailActivity extends AppCompatActivity
                     .error(R.drawable.ic_broken_image_black_24dp)
                     .into(mMovieImage);
         }
+    }
+
+    private boolean checkIfFavorite() {
+        boolean isFavorite = false;
+        ContentResolver popularMoviesContentResolver = this.getContentResolver();
+        String[] projectionColumns = {FavoriteMoviesContract.FavoriteMovieEntry._ID};
+
+        Cursor cursor = popularMoviesContentResolver.query(
+                FavoriteMoviesContract.FavoriteMovieEntry.CONTENT_URI.buildUpon().appendPath(String.valueOf(mMovie.getId())).build(),
+                projectionColumns,
+                null,
+                null,
+                null);
+        if (null == cursor || cursor.getCount() == 0) {
+            isFavorite = false;
+        } else {
+            isFavorite = true;
+        }
+        cursor.close();
+        return isFavorite;
+    }
+
+    private void addToFavorites() {
+        ContentValues contentValue = new ContentValues();
+        contentValue.put(FavoriteMoviesContract.FavoriteMovieEntry.COLUMN_ID, mMovie.getId());
+        contentValue.put(FavoriteMoviesContract.FavoriteMovieEntry.COLUMN_TITLE, mMovie.getTitle());
+        contentValue.put(FavoriteMoviesContract.FavoriteMovieEntry.COLUMN_PLOT, mMovie.getPlot());
+        contentValue.put(FavoriteMoviesContract.FavoriteMovieEntry.COLUMN_POSTER_PATH, mMovie.getPosterPath());
+        contentValue.put(FavoriteMoviesContract.FavoriteMovieEntry.COLUMN_RATING, mMovie.getRating());
+        contentValue.put(FavoriteMoviesContract.FavoriteMovieEntry.COLUMN_RELEASE_DATE, mMovie.getReleaseDate().toString());
+
+        ContentResolver popularMoviesContentResolver = this.getContentResolver();
+
+        popularMoviesContentResolver.insert(
+                FavoriteMoviesContract.FavoriteMovieEntry.CONTENT_URI,
+                contentValue);
+    }
+
+    private void removeFromFavorites() {
+            ContentResolver popularMoviesContentResolver = this.getContentResolver();
+
+            popularMoviesContentResolver.delete(
+                    FavoriteMoviesContract.FavoriteMovieEntry.CONTENT_URI.buildUpon().appendPath(String.valueOf(mMovie.getId())).build(),
+                    null,
+                    null);
     }
 
     @Override

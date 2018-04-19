@@ -21,7 +21,14 @@
             </intent-filter>
         </activity>
         <activity android:name=".SettingsActivity" />
-        <activity android:name=".DetailActivity" android:parentActivityName=".MainActivity"></activity>
+        <activity
+            android:name=".DetailActivity"
+            android:parentActivityName=".MainActivity" />
+        <provider
+            android:authorities="@string/content_authority"
+            android:name=".data.FavoriteMoviesProvider"
+            android:exported="false"
+            android:syncable="true"/>
     </application>
 
 </manifest>
