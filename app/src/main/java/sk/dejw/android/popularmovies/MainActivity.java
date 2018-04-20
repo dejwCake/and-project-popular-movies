@@ -27,6 +27,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 
 import sk.dejw.android.popularmovies.adapters.MovieAdapter;
+import sk.dejw.android.popularmovies.asyncTasks.AsyncTaskCompleteListener;
+import sk.dejw.android.popularmovies.asyncTasks.FetchMoviesTask;
 import sk.dejw.android.popularmovies.data.FavoriteMoviesContract;
 import sk.dejw.android.popularmovies.data.MoviePreferences;
 import sk.dejw.android.popularmovies.models.Movie;
@@ -109,7 +111,8 @@ public class MainActivity extends AppCompatActivity implements
             getSupportLoaderManager().restartLoader(ID_FAVORITE_MOVIES_LOADER, null, this);
         } else {
             if (GlobalNetworkUtils.hasConnection(this)) {
-                new FetchMoviesTask(this).execute(sortBy);
+                mLoadingIndicator.setVisibility(View.VISIBLE);
+                new FetchMoviesTask(this, new FetchMoviesTaskCompleteListener()).execute(sortBy);
             } else {
                 showErrorMessage();
             }
@@ -179,46 +182,11 @@ public class MainActivity extends AppCompatActivity implements
         mMovieAdapter.notifyDataSetChanged();
     }
 
-    public class FetchMoviesTask extends AsyncTask<String, Void, Movie[]> {
-
-        private Context mContext;
-
-        public FetchMoviesTask(Context context) {
-            mContext = context;
-        }
-
+    public class FetchMoviesTaskCompleteListener implements AsyncTaskCompleteListener<Movie[]>
+    {
         @Override
-        protected void onPreExecute() {
-            super.onPreExecute();
-            mLoadingIndicator.setVisibility(View.VISIBLE);
-        }
-
-        @Override
-        protected Movie[] doInBackground(String... params) {
-            if (params.length == 0) {
-                return null;
-            }
-
-            String sortBy = params[0];
-            URL requestUrl = MovieNetworkUtils.buildUrl(sortBy, mContext);
-
-            try {
-                String jsonResponse = MovieNetworkUtils
-                        .getResponseFromHttpUrl(requestUrl);
-
-                Movie[] movies = MovieJsonUtils
-                        .getMoviesFromJson(MainActivity.this, jsonResponse);
-
-                return movies;
-
-            } catch (Exception e) {
-                e.printStackTrace();
-                return null;
-            }
-        }
-
-        @Override
-        protected void onPostExecute(Movie[] movies) {
+        public void onTaskComplete(Movie[] movies)
+        {
             mLoadingIndicator.setVisibility(View.INVISIBLE);
             Log.i(TAG, mMovieAdapter.toString());
             if (movies != null) {
