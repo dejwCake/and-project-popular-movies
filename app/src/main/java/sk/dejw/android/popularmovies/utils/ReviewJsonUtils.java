@@ -7,7 +7,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import sk.dejw.android.popularmovies.models.Review;
-import sk.dejw.android.popularmovies.models.Trailer;
 
 public final class ReviewJsonUtils {
 
