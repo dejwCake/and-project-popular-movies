@@ -1,1 +1,1 @@
-Please add your Movie DB API KEY to MovieNetworkUtils.java file.
+Please add your Movie DB API KEY to gradle.properties file as MOVIE_DB_API_KEY="Your api key"
