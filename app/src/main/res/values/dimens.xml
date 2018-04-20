@@ -1,5 +1,25 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <dimen name="movie_image_width">200dp</dimen>
+    <dimen name="movie_image_height">300dp</dimen>
+    <dimen name="movie_detail_margin_top">8dp</dimen>
+    <dimen name="movie_detail_margin_bottom">8dp</dimen>
+    <dimen name="movie_detail_margin_left">8dp</dimen>
+    <dimen name="movie_detail_margin_start">@dimen/movie_detail_margin_left</dimen>
+    <dimen name="movie_detail_margin_right">8dp</dimen>
+    <dimen name="movie_detail_margin_end">@dimen/movie_detail_margin_right</dimen>
+
+    <dimen name="icon_width">24dp</dimen>
+    <dimen name="icon_height">24dp</dimen>
+
+    <dimen name="progress_bar_width">42dp</dimen>
+    <dimen name="progress_bar_height">42dp</dimen>
+
+    <dimen name="divider_height">1dp</dimen>
+    <dimen name="divider_top_margin">4dp</dimen>
+    <dimen name="divider_bottom_margin">4dp</dimen>
+
+    <dimen name="list_item_image">200dp</dimen>
     <dimen name="list_item_icon">24dp</dimen>
     <dimen name="list_item_padding_horizontal">16dp</dimen>
     <dimen name="list_item_padding_vertical">12dp</dimen>

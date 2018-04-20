@@ -13,7 +13,7 @@
 
     <TextView
         android:id="@+id/tv_review_author"
-        android:layout_width="328dp"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginEnd="@dimen/list_item_name_end_margin"
         android:layout_marginRight="@dimen/list_item_name_right_margin"

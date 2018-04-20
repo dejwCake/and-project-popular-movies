@@ -13,8 +13,8 @@
 
     <ImageView
         android:id="@+id/iv_trailer_play_icon"
-        android:layout_width="@dimen/list_item_icon"
-        android:layout_height="@dimen/list_item_icon"
+        android:layout_width="@dimen/icon_width"
+        android:layout_height="@dimen/icon_height"
         app:layout_constraintLeft_toLeftOf="parent"
         tools:src="@drawable/ic_play_arrow_black_24dp"/>
 

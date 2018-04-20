@@ -18,15 +18,19 @@
         android:id="@+id/tv_error_message"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:padding="16dp"
+        android:layout_marginEnd="@dimen/movie_detail_margin_end"
+        android:layout_marginRight="@dimen/movie_detail_margin_right"
+        android:layout_marginStart="@dimen/movie_detail_margin_start"
+        android:layout_marginLeft="@dimen/movie_detail_margin_left"
+        android:layout_marginTop="@dimen/movie_detail_margin_top"
         android:text="@string/error_message"
         android:textSize="20sp"
         android:visibility="invisible" />
 
     <ProgressBar
         android:id="@+id/pb_loading_indicator"
-        android:layout_width="42dp"
-        android:layout_height="42dp"
+        android:layout_width="@dimen/progress_bar_width"
+        android:layout_height="@dimen/progress_bar_height"
         android:layout_gravity="center"
         android:visibility="invisible" />
 
