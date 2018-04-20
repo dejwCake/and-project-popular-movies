@@ -10,7 +10,7 @@ import sk.dejw.android.popularmovies.utils.MovieJsonUtils;
 import sk.dejw.android.popularmovies.utils.MovieNetworkUtils;
 
 public class FetchMoviesTask extends AsyncTask<String, Void, Movie[]> {
-    private static final String TAG = "FetchMyDataTask";
+    private static final String TAG = "FetchMoviesTask";
     private Context mContext;
     private AsyncTaskCompleteListener<Movie[]> listener;
 

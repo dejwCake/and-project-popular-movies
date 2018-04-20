@@ -34,6 +34,9 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import sk.dejw.android.popularmovies.adapters.ReviewAdapter;
 import sk.dejw.android.popularmovies.adapters.TrailerAdapter;
+import sk.dejw.android.popularmovies.asyncTasks.AsyncTaskCompleteListener;
+import sk.dejw.android.popularmovies.asyncTasks.FetchReviewsTask;
+import sk.dejw.android.popularmovies.asyncTasks.FetchTrailersTask;
 import sk.dejw.android.popularmovies.data.FavoriteMoviesContract;
 import sk.dejw.android.popularmovies.models.Movie;
 import sk.dejw.android.popularmovies.models.Review;
@@ -257,7 +260,8 @@ public class DetailActivity extends AppCompatActivity
         showTrailerDataView();
 
         if (GlobalNetworkUtils.hasConnection(this)) {
-            new DetailActivity.FetchTrailersTask(this).execute(mMovie.getId());
+            mTrailerLoadingIndicator.setVisibility(View.VISIBLE);
+            new FetchTrailersTask(this, new FetchTrailersTaskCompleteListener()).execute(mMovie.getId());
         } else {
             showTrailerErrorMessage();
         }
@@ -273,46 +277,11 @@ public class DetailActivity extends AppCompatActivity
         mTrailerErrorMessage.setVisibility(View.VISIBLE);
     }
 
-    public class FetchTrailersTask extends AsyncTask<Integer, Void, Trailer[]> {
-
-        private Context mContext;
-
-        public FetchTrailersTask(Context context) {
-            mContext = context;
-        }
-
+    public class FetchTrailersTaskCompleteListener implements AsyncTaskCompleteListener<Trailer[]>
+    {
         @Override
-        protected void onPreExecute() {
-            super.onPreExecute();
-            mTrailerLoadingIndicator.setVisibility(View.VISIBLE);
-        }
-
-        @Override
-        protected Trailer[] doInBackground(Integer... params) {
-            if (params.length == 0) {
-                return null;
-            }
-
-            Integer id = params[0];
-            URL requestUrl = TrailerNetworkUtils.buildUrl(id, mContext);
-
-            try {
-                String jsonResponse = TrailerNetworkUtils
-                        .getResponseFromHttpUrl(requestUrl);
-
-                Trailer[] trailers = TrailerJsonUtils
-                        .getTrailersFromJson(DetailActivity.this, jsonResponse);
-
-                return trailers;
-
-            } catch (Exception e) {
-                e.printStackTrace();
-                return null;
-            }
-        }
-
-        @Override
-        protected void onPostExecute(Trailer[] trailers) {
+        public void onTaskComplete(Trailer[] trailers)
+        {
             mTrailerLoadingIndicator.setVisibility(View.INVISIBLE);
             Log.i(TAG, String.valueOf(trailers.length));
             if (trailers != null) {
@@ -329,7 +298,8 @@ public class DetailActivity extends AppCompatActivity
         showReviewDataView();
 
         if (GlobalNetworkUtils.hasConnection(this)) {
-            new DetailActivity.FetchReviewsTask(this).execute(mMovie.getId());
+            mReviewLoadingIndicator.setVisibility(View.VISIBLE);
+            new FetchReviewsTask(this, new FetchReviewsTaskCompleteListener()).execute(mMovie.getId());
         } else {
             showReviewErrorMessage();
         }
@@ -345,46 +315,11 @@ public class DetailActivity extends AppCompatActivity
         mReviewErrorMessage.setVisibility(View.VISIBLE);
     }
 
-    public class FetchReviewsTask extends AsyncTask<Integer, Void, Review[]> {
-
-        private Context mContext;
-
-        public FetchReviewsTask(Context context) {
-            mContext = context;
-        }
-
+    public class FetchReviewsTaskCompleteListener implements AsyncTaskCompleteListener<Review[]>
+    {
         @Override
-        protected void onPreExecute() {
-            super.onPreExecute();
-            mReviewLoadingIndicator.setVisibility(View.VISIBLE);
-        }
-
-        @Override
-        protected Review[] doInBackground(Integer... params) {
-            if (params.length == 0) {
-                return null;
-            }
-
-            Integer id = params[0];
-            URL requestUrl = ReviewNetworkUtils.buildUrl(id, mContext);
-
-            try {
-                String jsonResponse = ReviewNetworkUtils
-                        .getResponseFromHttpUrl(requestUrl);
-
-                Review[] reviews = ReviewJsonUtils
-                        .getReviewsFromJson(DetailActivity.this, jsonResponse);
-
-                return reviews;
-
-            } catch (Exception e) {
-                e.printStackTrace();
-                return null;
-            }
-        }
-
-        @Override
-        protected void onPostExecute(Review[] reviews) {
+        public void onTaskComplete(Review[] reviews)
+        {
             mReviewLoadingIndicator.setVisibility(View.INVISIBLE);
             Log.i(TAG, String.valueOf(reviews.length));
             if (reviews != null) {
